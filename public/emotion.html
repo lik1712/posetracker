@@ -16,13 +16,45 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
     }
 
     canvas {
       position: absolute;
     }
+
+    .controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .controls label {
+      display: block;
+    }
   </style>
 </head>
 <body>
   <video id="video" width="640" height="480" autoplay muted></video>
+  
+  <div class="controls">
+    <label>
+      <input type="checkbox" id="showBoundingBox" checked> Show Bounding Box
+    </label>
+    <label>
+      <input type="checkbox" id="showLandmarks" checked> Show Facial Landmarks
+    </label>
+    <label>
+      <input type="checkbox" id="showAgeGender" checked> Show Age/Gender
+    </label>
+    <label>
+      <input type="checkbox" id="showExpressions" checked> Show Expressions
+    </label>
+  </div>
 </body>
+</html>

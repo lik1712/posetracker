@@ -1,4 +1,8 @@
 const video = document.getElementById('video')
+const showBoundingBox = document.getElementById('showBoundingBox')
+const showLandmarks = document.getElementById('showLandmarks')
+const showAgeGender = document.getElementById('showAgeGender')
+const showExpressions = document.getElementById('showExpressions')
 
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
@@ -26,22 +30,30 @@ video.addEventListener('play', () => {
       .withFaceLandmarks()
       .withFaceExpressions()
       .withAgeAndGender()
-      
+    
     const resizedDetections = faceapi.resizeResults(detections, displaySize)
     canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-    
-    // Draw the face detection and landmarks
-    faceapi.draw.drawDetections(canvas, resizedDetections)
-    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
-    faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+
+    // Draw the face detection and landmarks based on checkbox state
+    if (showBoundingBox.checked) {
+      faceapi.draw.drawDetections(canvas, resizedDetections)
+    }
+    if (showLandmarks.checked) {
+      faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
+    }
+    if (showExpressions.checked) {
+      faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+    }
     
     // Draw age/gender label
-    resizedDetections.forEach(detection => {
-      const box = detection.detection.box
-      const drawBox = new faceapi.draw.DrawBox(box, {
-        label: `${Math.round(detection.age)} years old, ${detection.gender}`
+    if (showAgeGender.checked) {
+      resizedDetections.forEach(detection => {
+        const box = detection.detection.box
+        const drawBox = new faceapi.draw.DrawBox(box, {
+          label: `${Math.round(detection.age)} years old, ${detection.gender}`
+        })
+        drawBox.draw(canvas)
       })
-      drawBox.draw(canvas)
-    })
+    }
   }, 1000 / 30) // 30 frames per second
 })
