@@ -1,0 +1,28 @@
+{
+  "name": "pose-estimation-app",
+  "version": "1.0.0",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.12.2",
+    "@mediapipe/tasks-vision": "^0.10.17",
+    "express": "^4.19.2",
+    "google-protobuf": "^3.21.4",
+    "nodemon": "^3.1.4"
+  },
+  "devDependencies": {
+    "@grpc/proto-loader": "^0.7.13",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.12",
+    "grpc-tools": "^1.12.4",
+    "typescript": "^5.5.4"
+  }
+}

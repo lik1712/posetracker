@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pose Detection</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="script.js" defer></script>
+</head>
+<body>
+  <h1>Pose detection using the MediaPipe PoseLandmarker task</h1>
+
+  <section id="demos" class="invisible">
+    <h2>Demo: Webcam continuous pose landmarks detection</h2>
+    <p>Stand in front of your webcam to get real-time pose landmarker detection.</br>Click <b>enable webcam</b> below and grant access to the webcam if prompted.</p>
+    
+    <div id="liveView" class="videoView">
+      <label for="cameraSelect">Select Camera:</label>
+      <select id="cameraSelect"></select>
+      <button id="webcamButton" class="mdc-button mdc-button--raised">
+        <span class="mdc-button__ripple"></span>
+        <span class="mdc-button__label">ENABLE WEBCAM</span>
+      </button>
+      <div style="position: relative;">
+        <video id="webcam" style="width: 1280px; height: 720px; position: abso" autoplay playsinline></video>
+        <canvas class="output_canvas" id="output_canvas" width="1280" height="720" style="position: absolute; left: 0px; top: 0px;"></canvas>
+      </div>
+    </div>
+
+    <!-- <h2>Demo: Upload and detect poses in video</h2>
+    <p>Upload a video below to see the key landmarks of the body in the video.</p>
+    
+    <div class="uploadVideo">
+      <input type="file" id="videoInput" accept="video/*" />
+      <video id="uploadedVideo" style="display: none;" controls></video>
+      <canvas id="videoOutputCanvas" style="display: none;"></canvas>
+    </div> -->
+  </section>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Face Landmark Detection</title>
+  <script defer src="face-api.min.js"></script>
+  <script defer src="facescript.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      position: absolute;
+    }
+
+    video {
+      clear: both;
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      display: flex;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="media">
+    <video id="video" width="720" height="560" muted></video>
+    <div class="controls">
+       <button id="v-play" type="button">play</button>
+       <button id="v-pause" type="button" disabled>pause</button>
+    </div>
+  </div>    
+</body>
+</html>
