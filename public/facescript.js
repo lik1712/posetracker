@@ -101,6 +101,27 @@ video.addEventListener('play', () => {
           });
         }
 
+        // Extract and send the highest probability expression to the server
+        const faceData = resizedDetections.map(detection => {
+          const highestExpression = Object.entries(detection.expressions).reduce((a, b) =>
+            b[1] > a[1] ? b : a
+          ); // Find the expression with the highest probability
+
+          return {
+            expression: highestExpression[0], // Emotion (e.g., "happy")
+            probability: highestExpression[1] // Probability (e.g., 0.95)
+          };
+        });
+
+        if (faceData.length > 0) {
+          // Send face expression data to the Node.js server
+          fetch('http://localhost:5000/send-face-expression-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ faceData })
+          }).catch(err => console.error('Error sending face expression data:', err));
+        }
+
         requestAnimationFrame(detectFaces);
       });
   }

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package FSR.DigitalTwin.App.GRPC;
+
+// Define the message for face expression data
+message FaceExpressionData {
+    repeated FaceExpression expressions = 1;
+}
+
+// Define the structure of each face expression
+message FaceExpression {
+    string emotion = 1;         // Emotion with the highest probability (e.g., "happy")
+    float probability = 2;      // Probability of the emotion (e.g., 0.95)
+}
+
+// Define the response for the face expression RPC
+message FaceExpressionResponse {
+    string message = 1;
+}
+
+// Define the FaceService gRPC service
+service FaceService {
+    rpc SendFaceExpressionData (FaceExpressionData) returns (FaceExpressionResponse);
+}
