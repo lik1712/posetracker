@@ -2,15 +2,26 @@ syntax = "proto3";
 
 package FSR.DigitalTwin.App.GRPC;
 
-// Define the message for face expression data
-message FaceExpressionData {
-    repeated FaceExpression expressions = 1;
+// Enum for face expression types
+enum FaceExpressionType {
+    FE_TYPE_NEUTRAL = 0;
+    FE_TYPE_HAPPY = 1;
+    FE_TYPE_SAD = 2;
+    FE_TYPE_ANGRY = 3;
+    FE_TYPE_FEARFUL = 4;
+    FE_TYPE_DISGUSTED = 5;
+    FE_TYPE_SURPRISED = 6;
 }
 
 // Define the structure of each face expression
 message FaceExpression {
-    string emotion = 1;         // Emotion with the highest probability (e.g., "happy")
-    float probability = 2;      // Probability of the emotion (e.g., 0.95)
+    FaceExpressionType emotion = 1; // Enum for face expression type
+    float probability = 2;         // Probability of the emotion
+}
+
+// Define the message for face expression data
+message FaceExpressionData {
+    repeated FaceExpression expressions = 1;
 }
 
 // Define the response for the face expression RPC

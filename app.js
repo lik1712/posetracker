@@ -74,67 +74,62 @@ app.post('/send-pose-data', express.json(), (req, res) => {
   });
 });
 
+const emotionMap = {
+  neutral: 0, // FE_TYPE_NEUTRAL
+  happy: 1,   // FE_TYPE_HAPPY
+  sad: 2,     // FE_TYPE_SAD
+  angry: 3,   // FE_TYPE_ANGRY
+  fearful: 4, // FE_TYPE_FEARFUL
+  disgusted: 5, // FE_TYPE_DISGUSTED
+  surprised: 6 // FE_TYPE_SURPRISED
+};
+
 // Endpoint to receive face expression data from the frontend
 app.post('/send-face-expression-data', express.json(), (req, res) => {
   const { faceData } = req.body;
 
-  console.log('Face expression data received:', faceData);
-
   if (!faceData || !Array.isArray(faceData) || faceData.length === 0) {
-    return res.status(400).send('Invalid face expression data');
+      console.warn('Invalid face expression data: Empty or invalid structure');
+      return res.status(400).json({ error: 'Invalid face expression data' });
   }
 
-  const emotionMap = {
-    neutral: 'FE_TYPE_NEUTRAL',
-    happy: 'FE_TYPE_HAPPY',
-    sad: 'FE_TYPE_SAD',
-    angry: 'FE_TYPE_ANGRY',
-    fearful: 'FE_TYPE_FEARFUL',
-    disgusted: 'FE_TYPE_DISGUSTED',
-    surprised: 'FE_TYPE_SURPRISED',
-  };
-
   const grpcFaceData = {
-    expressions: faceData
-      .map((face, index) => {
-        // Check if face is an object and has the required properties
-        if (
-          typeof face !== 'object' ||
-          !face.expression ||
-          typeof face.expression !== 'string' ||
-          !('probability' in face) ||
-          typeof face.probability !== 'number'
-        ) {
-          console.warn(`Invalid face data at index ${index}:`, face);
-          return null; // Skip invalid data
-        }
+      expressions: faceData
+          .map((face, index) => {
+              if (!face || typeof face.expression !== 'string' || typeof face.probability !== 'number') {
+                  console.warn(`Invalid face data at index ${index}:`, face);
+                  return null;
+              }
 
-        // Map emotion to the corresponding enum value
-        const emotionEnum = emotionMap[face.expression.toLowerCase()];
-        if (!emotionEnum) {
-          console.warn(`Unknown emotion at index ${index}: ${face.expression}`);
-          return null; // Skip unknown emotions
-        }
+              const emotionKey = face.expression.toLowerCase().trim();
 
-        return {
-          emotion: emotionEnum, // Use the Protobuf enum value
-          probability: face.probability,
-        };
-      })
-      .filter(Boolean), // Remove any null values
+              const emotionEnum = emotionMap[emotionKey];
+              if (emotionEnum === undefined) {
+                  console.warn(`Unknown emotion at index ${index}: "${emotionKey}"`);
+                  return null;
+              }
+
+              return {
+                  emotion: emotionEnum,
+                  probability: face.probability
+              };
+          })
+          .filter(Boolean)
   };
+
 
   if (grpcFaceData.expressions.length === 0) {
-    return res.status(400).send('No valid face expressions to process');
+      console.warn('No valid face expressions to process.');
+      return res.status(400).json({ error: 'No valid face expressions to process' });
   }
 
   faceClient.SendFaceExpressionData(grpcFaceData, (err, response) => {
-    if (err) {
-      console.error('gRPC FaceService error:', err.details);
-      return res.status(500).send('Error sending face expression data');
-    }
-    console.log('Face expression data sent successfully. Response:', response.message);
-    res.json({ message: response.message });
+      if (err) {
+          console.error('gRPC FaceService error:', err.details);
+          return res.status(500).json({ error: 'Error sending face expression data' });
+      }
+      console.log('Face expression data sent successfully:', response.message);
+      res.json({ message: response.message });
   });
 });
 

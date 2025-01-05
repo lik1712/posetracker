@@ -103,24 +103,50 @@ video.addEventListener('play', () => {
 
         // Extract and send the highest probability expression to the server
         const faceData = resizedDetections.map(detection => {
-          const highestExpression = Object.entries(detection.expressions).reduce((a, b) =>
-            b[1] > a[1] ? b : a
-          ); // Find the expression with the highest probability
-
+          if (!detection.expressions) {
+            return null;
+          }
+        
+          // Find the highest probability emotion
+          const highestExpression = Object.entries(detection.expressions)
+            .reduce((a, b) => (b[1] > a[1] ? b : a), ['', 0]);
+        
+          // Ensure emotion string is clean and lowercase
+          const emotion = highestExpression[0]?.toLowerCase().trim() || 'neutral';
+          const probability = highestExpression[1] || 0;
+        
           return {
-            expression: highestExpression[0], // Emotion (e.g., "happy")
-            probability: highestExpression[1] // Probability (e.g., 0.95)
+            expression: emotion,
+            probability: probability
           };
-        });
+        }).filter(Boolean);
 
         if (faceData.length > 0) {
-          // Send face expression data to the Node.js server
+          const payload = { faceData };
+        
           fetch('http://localhost:5000/send-face-expression-data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ faceData })
-          }).catch(err => console.error('Error sending face expression data:', err));
-        }
+            body: JSON.stringify(payload)
+          })
+            .then(response => {
+              if (!response.ok) {
+                return response.json().then(err => {
+                  console.error('Server error response:', err);
+                  throw new Error(err.error || 'Unknown server error');
+                }).catch(() => {
+                  throw new Error(`Unexpected response: ${response.statusText}`);
+                });
+              }
+              return response.json();
+            })
+            .then(data => {
+              console.log('Server response:', data);
+            })
+            .catch(err => {
+              console.error('Error sending face expression data:', err.message);
+            });
+        }      
 
         requestAnimationFrame(detectFaces);
       });
