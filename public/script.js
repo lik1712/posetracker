@@ -11,9 +11,10 @@ import {
   let enableWebcamButton;
   let cameraSelect;
   let webcamRunning = false;
+  let isSavingPoseData = false; 
   const videoHeight = "360px";
   const videoWidth = "480px";
-  
+ 
   // Create PoseLandmarker instance
   const createPoseLandmarker = async () => {
     const vision = await FilesetResolver.forVisionTasks(
@@ -51,7 +52,7 @@ import {
   populateCameraSelect();
   
   /********************************************************************
-  // Demo : Continuous pose detection from webcam.
+  // Continuous pose detection from webcam.
   ********************************************************************/
   
   const video = document.getElementById("webcam");
@@ -122,37 +123,19 @@ import {
         canvasCtx.restore();
         if (result.landmarks.length >0 ){
         
-         // Extract the pose landmarks and world landmarks and send them to Node.js server
-        const landmarks = result.landmarks[0].map(lm => ({ x: lm.x, y: lm.y, z: lm.z }));
-        const worldLandmarks = result.worldLandmarks[0].map(wlm => ({ x: wlm.x, y: wlm.y, z: wlm.z }));
-  
-        // console.log('Sending pose data:', { landmarks, worldLandmarks });
-  
-        // Send pose data to Node.js server
-        fetch('http://localhost:5000/send-pose-data', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            landmarks: landmarks,
-            worldLandmarks: worldLandmarks
-          })
-        })
-        .then(response => {
-          if (!response.ok) {
-            return response.text().then(text => {
-              throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
-            });
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log('Pose data sent successfully:', data);
-        })
-        .catch((error) => {
-          console.error('Error sending pose data:', error);
-        });          
+          // Extract the pose landmarks and world landmarks and send them to Node.js server
+          const landmarks = result.landmarks[0].map(lm => ({ x: lm.x, y: lm.y, z: lm.z }));
+          const worldLandmarks = result.worldLandmarks[0].map(wlm => ({ x: wlm.x, y: wlm.y, z: wlm.z }));
+    
+          // console.log('Sending pose data:', { landmarks, worldLandmarks });
+    
+          fetch("http://localhost:5000/send-pose-data", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ landmarks, worldLandmarks }),
+          }).catch((err) => console.error("Error sending pose data:", err));      
         }
       });
     }
@@ -161,4 +144,30 @@ import {
       window.requestAnimationFrame(predictWebcam);
     }
   }
-  
+
+// Toggle Pose Data Saving Button
+const togglePoseSaveButton = document.getElementById('togglePoseSave');
+togglePoseSaveButton.addEventListener('click', async () => {
+  isSavingPoseData = !isSavingPoseData;
+  togglePoseSaveButton.innerText = isSavingPoseData
+    ? 'Stop Pose Data Saving'
+    : 'Start Pose Data Saving';
+
+  // Notify backend to toggle saving
+  try {
+    const response = await fetch('http://localhost:5000/toggle-save-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'pose' }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to toggle pose saving on server');
+    }
+    const result = await response.json();
+    console.log(result.message);
+  } catch (err) {
+    console.error('Error toggling saving on server:', err);
+  }
+});
+

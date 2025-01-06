@@ -4,8 +4,10 @@ const showLandmarks = document.getElementById('showLandmarks');
 const showAgeGender = document.getElementById('showAgeGender');
 const showExpressions = document.getElementById('showExpressions');
 const cameraSelect = document.getElementById('cameraSelect'); 
+const toggleEmotionSaveButton = document.getElementById("toggleEmotionSave");
 
 let currentStream = null; // Variable to keep track of the current stream
+let isSavingEmotionData = false; // Flag for emotion data saving
 
 // Models are loaded only once and reused
 Promise.all([
@@ -123,30 +125,14 @@ video.addEventListener('play', () => {
 
         if (faceData.length > 0) {
           const payload = { faceData };
-        
+
+          // Always send data to .NET
           fetch('http://localhost:5000/send-face-expression-data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
-          })
-            .then(response => {
-              if (!response.ok) {
-                return response.json().then(err => {
-                  console.error('Server error response:', err);
-                  throw new Error(err.error || 'Unknown server error');
-                }).catch(() => {
-                  throw new Error(`Unexpected response: ${response.statusText}`);
-                });
-              }
-              return response.json();
-            })
-            .then(data => {
-              console.log('Server response:', data);
-            })
-            .catch(err => {
-              console.error('Error sending face expression data:', err.message);
-            });
-        }      
+          }).catch(err => console.error('Error sending face expression data:', err));
+        } 
 
         requestAnimationFrame(detectFaces);
       });
@@ -154,3 +140,31 @@ video.addEventListener('play', () => {
 
   requestAnimationFrame(detectFaces);
 });
+
+// Toggle Saving Button
+toggleEmotionSaveButton.addEventListener('click', async () => {
+  isSavingEmotionData = !isSavingEmotionData;
+
+  // Update button text
+  toggleEmotionSaveButton.innerText = isSavingEmotionData ? 'Stop Emotion Data Saving' : 'Start Emotion Data Saving';
+
+  // Notify the backend
+  try {
+    const response = await fetch('http://localhost:5000/toggle-save-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'emotion' }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Failed to toggle emotion saving on server:', errorData.error);
+    } else {
+      const result = await response.json();
+      console.log(result.message);
+    }
+  } catch (error) {
+    console.error('Error communicating with the server:', error);
+  }
+});
+
